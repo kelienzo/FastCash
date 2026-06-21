@@ -3,6 +3,7 @@ package com.kelly.fastcash.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kelly.fastcash.domain.models.Payment
+import com.kelly.fastcash.domain.models.PaymentResponse
 import com.kelly.fastcash.domain.usecase.ProcessPaymentUseCase
 import com.kelly.fastcash.domain.usecase.ValidateAmountUseCase
 import com.kelly.fastcash.domain.usecase.ValidateCurrencyUseCase
@@ -89,7 +90,7 @@ class PaymentViewModel(
     private fun updatePaymentUiState(
         isLoading: Boolean = false,
         errorMessage: String? = null,
-        response: Payment? = null
+        response: PaymentResponse? = null
     ) {
         _paymentUiState.value = PaymentUiState(
             isLoading, errorMessage, response
@@ -114,5 +115,5 @@ data class FormUiState(
 data class PaymentUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val response: Payment? = null
+    val response: PaymentResponse? = null
 )

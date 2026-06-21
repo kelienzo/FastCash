@@ -1,6 +1,7 @@
 package com.kelly.fastcash.domain.usecase
 
 import com.kelly.fastcash.domain.models.Payment
+import com.kelly.fastcash.domain.models.PaymentResponse
 import com.kelly.fastcash.domain.repository.FirestoreRepository
 import com.kelly.fastcash.domain.repository.PaymentRepository
 import kotlinx.coroutines.Dispatchers
@@ -15,12 +16,17 @@ class ProcessPaymentUseCase(
     private val firestoreRepository: FirestoreRepository
 ) {
 
-    operator fun invoke(payment: Payment): Flow<Result<Payment>> = flow<Result<Payment>> {
-        val payment = paymentRepository.processPayment(payment)
-        firestoreRepository.saveTransaction(payment)
-        emit(Result.success(payment))
-    }.catch {
-        it.printStackTrace()
-        emit(Result.failure(it))
-    }.flowOn(Dispatchers.IO)
+    operator fun invoke(payment: Payment): Flow<Result<PaymentResponse>> =
+        flow<Result<PaymentResponse>> {
+            val paymentRes = paymentRepository.processPayment(payment)
+            if (paymentRes.status) {
+                firestoreRepository.saveTransaction(payment)
+                emit(Result.success(paymentRes))
+            } else {
+                emit(Result.failure(Throwable("Payment failed.")))
+            }
+        }.catch {
+            it.printStackTrace()
+            emit(Result.failure(it))
+        }.flowOn(Dispatchers.IO)
 }
