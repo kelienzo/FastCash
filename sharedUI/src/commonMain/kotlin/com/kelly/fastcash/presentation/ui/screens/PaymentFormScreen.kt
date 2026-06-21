@@ -1,0 +1,185 @@
+package com.kelly.fastcash.presentation.ui.screens
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.kelly.fastcash.presentation.TextFieldAmountFormat
+import com.kelly.fastcash.presentation.viewmodel.MainPaymentUiState
+import com.kelly.fastcash.utils.handleAmountInput
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PaymentFormScreen(
+    mainPaymentUiState: MainPaymentUiState,
+    onEvent: (PaymentFormEvent) -> Unit
+) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text("Send Payment") })
+        }
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
+            var expanded by rememberSaveable { mutableStateOf(false) }
+            var isEmailFocused by rememberSaveable { mutableStateOf(false) }
+            var isAmountFocused by rememberSaveable { mutableStateOf(false) }
+
+            OutlinedTextField(
+                value = mainPaymentUiState.formUiState.email,
+                onValueChange = { onEvent(PaymentFormEvent.OnEnterEmail(it)) },
+                label = { Text("Recipient Email") },
+                modifier = Modifier.fillMaxWidth().onFocusChanged {
+                    isEmailFocused = it.isFocused
+                },
+                isError = if (isEmailFocused) mainPaymentUiState.formUiState.isEmailValid else false,
+                supportingText = {
+                    if (isEmailFocused && mainPaymentUiState.formUiState.isEmailValid.not())
+                        Text("Enter a valid email", color = MaterialTheme.colorScheme.error)
+                }
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            OutlinedTextField(
+                value = mainPaymentUiState.formUiState.amount,
+                onValueChange = { input ->
+                    handleAmountInput(text = input) {
+                        onEvent(PaymentFormEvent.OnEnterEmail(it))
+                    }
+                },
+                label = { Text("Amount") },
+                modifier = Modifier.fillMaxWidth().onFocusChanged {
+                    isAmountFocused = it.isFocused
+                },
+                visualTransformation = TextFieldAmountFormat,
+                isError = if (isAmountFocused) mainPaymentUiState.formUiState.isAmountValid else false,
+                supportingText = {
+                    if (isAmountFocused && mainPaymentUiState.formUiState.isAmountValid.not())
+                        Text("Enter a valid amount", color = MaterialTheme.colorScheme.error)
+                }
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                TextField(
+                    placeholder = { Text("Select currency") },
+                    modifier = Modifier.fillMaxWidth(),
+                    value = mainPaymentUiState.formUiState.currency,
+                    onValueChange = {},
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+                )
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    listOf("USD", "EUR", "NGN").forEach { c ->
+                        DropdownMenuItem(
+                            text = { Text(c) },
+                            onClick = {
+                                onEvent(PaymentFormEvent.OnSelectCurrency(c))
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { onEvent(PaymentFormEvent.OnSendPayment) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !mainPaymentUiState.paymentUiState.isLoading
+                        && mainPaymentUiState.formUiState.isEmailValid
+                        && mainPaymentUiState.formUiState.isAmountValid
+                        && mainPaymentUiState.formUiState.isValidCurrency
+            ) {
+                if (mainPaymentUiState.paymentUiState.isLoading) CircularProgressIndicator(
+//                    color = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+                else Text("Send Payment")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = { onEvent(PaymentFormEvent.OnNavigateToTransactionHistory) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                Text("View Transaction History")
+            }
+        }
+    }
+
+    mainPaymentUiState.paymentUiState.run {
+        errorMessage?.let { errorMSG ->
+            AlertDialog(
+                onDismissRequest = { onEvent(PaymentFormEvent.OnResetState) },
+                confirmButton = {
+                    TextButton(onClick = { onEvent(PaymentFormEvent.OnResetState) }) {
+                        Text("OK")
+                    }
+                },
+                title = { Text("Error") },
+                text = { Text(errorMSG) }
+            )
+        }
+        response?.let {
+            AlertDialog(
+                onDismissRequest = { onEvent(PaymentFormEvent.OnResetState) },
+                confirmButton = {
+                    TextButton(onClick = { onEvent(PaymentFormEvent.OnResetState) }) {
+                        Text("OK")
+                    }
+                },
+                title = { Text("Success") },
+                text = { Text("Payment Successful") }
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PaymentFormScreenPrev() {
+    PaymentFormScreen(
+        mainPaymentUiState = MainPaymentUiState(),
+        onEvent = {}
+    )
+}
+
+sealed interface PaymentFormEvent {
+    data object OnResetState : PaymentFormEvent
+    data object OnNavigateToTransactionHistory : PaymentFormEvent
+    data class OnEnterEmail(val email: String) : PaymentFormEvent
+    data class OnEnterAmount(val amount: String) : PaymentFormEvent
+    data class OnSelectCurrency(val currency: String) : PaymentFormEvent
+    data object OnSendPayment : PaymentFormEvent
+}
