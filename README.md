@@ -1,62 +1,89 @@
 # FastCash - KMP Payment App
 
-A cross-platform FinTech application built with Kotlin Multiplatform (KMP), Firebase, and Jetpack Compose.
+A cross-platform FinTech application built with **Kotlin Multiplatform (KMP)**, **Firebase**, and **Jetpack Compose**. This project demonstrates a robust architecture for sending payments and tracking transaction history.
 
-## Architecture
-This project follows a Clean Architecture approach within a KMP structure:
-- **sharedLogic**: Contains domain models, validation logic, Ktor API client, and platform-specific Firestore repositories (using expect/actual).
-- **sharedUI**: Shared UI components built with Compose Multiplatform.
-- **androidApp**: Android entry point, Koin initialization, and platform-specific configuration.
+## 🚀 Architecture
+This project follows **Clean Architecture** principles within a KMP structure:
 
-## Features
-- **Send Payment**: Form with validation for email, amount, and currency.
-- **Transaction History**: Real-time listing of transactions fetched from Firebase Firestore.
-- **Cross-Platform Logic**: 100% of validation and 90% of data fetching code is shared.
+- **`:sharedLogic`**: Core business logic (Common to all platforms).
+    - **Domain**: Entities (`PaymentRequest`, `PaymentResponse`), Use Cases (`ProcessPaymentUseCase`, `GetTransactionsUseCase`), and Repository interfaces (`PaymentRepository`, `DatabaseRepository`).
+    - **Data**: Repository implementations, DTOs, Mappers, and **DataSource abstractions**.
+    - **DI**: Koin modules for common and platform-specific dependencies.
+- **`:sharedUI`**: Shared UI components built with **Compose Multiplatform**.
+    - Includes the main `PaymentFormScreen` and `TransactionHistory` (integrated in a single reactive flow).
+    - Managed via `PaymentViewModel` in the presentation layer.
+- **`:androidApp`**: Android-specific entry point and configuration.
+- **`:appiumTests`**: Dedicated module for Appium UI automation.
 
-## Tech Stack
+## ✨ Features
+- **Send Payment**:
+    - Input validation for email, amount (>0), and currency (USD, EUR).
+    - Calls a REST API for processing.
+    - Real-time sync to **Firebase Firestore** via the `DatabaseRepository`.
+- **Transaction History**:
+    - Displays a real-time list of transactions using Firestore's snapshot listeners.
+    - Each record shows the recipient, amount, currency, status, and formatted timestamp.
+
+## 🛠 Tech Stack
 - **UI**: Jetpack Compose / Compose Multiplatform
 - **DI**: Koin
-- **Networking**: Ktor
-- **Database**: Firebase Firestore
-- **Serialization**: kotlinx-serialization
+- **Networking**: Ktor (with Content Negotiation & Logging)
+- **Database**: Firebase Firestore (Android-native via `DataSource` abstraction)
+- **Serialization**: `kotlinx-serialization`
+- **Date/Time**: `kotlinx-datetime`
 
-## Setup Instructions
+## 📦 Setup Instructions
 
-### 1. Firebase Setup
-- Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
-- Add an Android app with package name `com.kelly.fastcash`.
-- Download `google-services.json` and place it in the `androidApp/` directory.
-- Enable **Cloud Firestore** in your Firebase project.
+### 1. Firebase Configuration
+1.  Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
+2.  Add an Android app with package name `com.kelly.fastcash`.
+3.  Download `google-services.json` and place it in the `androidApp/` directory.
+4.  Enable **Cloud Firestore** and create a collection named `payments`.
 
-### 2. Mock API
-- The app calls `POST /payments`.
-- You can use a mock server (e.g., [Mocki](https://mocki.io/) or [JSON Server](https://github.com/typicode/json-server)) to host the endpoint.
-- Update the `baseUrl` in `sharedLogic/src/commonMain/kotlin/com/kelly/fastcash/data/remote/PaymentApi.kt`.
+### 2. Backend API
+The app is configured to use a mock API: `https://6a36bb11766b831960f9816a.mockapi.io`.
+You can update the `baseUrl` in `sharedLogic/src/commonMain/kotlin/com/kelly/fastcash/data/remote/PaymentService.kt` if you wish to use a different endpoint.
 
 ### 3. Running the App
-- Open in Android Studio.
-- Sync Gradle.
-- Run the `androidApp` configuration.
+1.  Open the project in **Android Studio**.
+2.  Sync Gradle.
+3.  Run the `androidApp` configuration on an emulator or physical device.
 
-## Running Tests
+## 🧪 Testing
 
-### Unit Tests
-Run the shared logic unit tests:
+### ✅ Unit Tests
+Covers Use Case logic and validation.
 ```bash
 ./gradlew :sharedLogic:test
 ```
 
-### BDD Tests
-The scenarios are defined in `sharedLogic/src/commonTest/resources/features/payments.feature`. You can run them using the Cucumber runner (if configured) or view the logic mirrored in `PaymentValidatorTest.kt`.
+### 🥒 BDD Tests (Cucumber)
+Behavior-driven scenarios verified against the shared logic layer.
+- **Scenarios**: `sharedLogic/src/commonTest/resources/features/payments.feature`
+- **Execution**: Included in the Android host tests.
+```bash
+./gradlew :sharedLogic:testAndroidHostTest
+```
 
-### API Performance (JMeter)
-1. Open the provided `payment_test.jmx` (template below) in JMeter.
-2. Set the target URL to your `/payments` endpoint.
-3. Run the thread group with 5 concurrent users.
+### 📱 UI Testing (Appium)
+Automated flow: Enter details -> Send -> Verify in history list.
+**Prerequisites**:
+1.  Run Appium Server (`appium`).
+2.  Install the app on a connected device/emulator.
+**Execution**:
+```bash
+./gradlew :appiumTests:test
+```
 
-### UI Testing (Appium)
-- Appium scripts should target the `MainActivity`.
-- Use the `contentDescription` "Send Payment Button" to locate interactions.
+### 📈 Performance Testing (JMeter)
+A JMeter test plan should target the `POST /payments` endpoint.
+- **Target**: `https://6a36bb11766b831960f9816a.mockapi.io/payments`
+- **Config**: 5 concurrent users, measuring response time and throughput.
 
-## KMP Potential
-The shared logic is already prepared for iOS. By implementing the `actual` FirestoreRepository for iOS using the Firebase iOS SDK, the entire business logic and UI (via Compose Multiplatform) can be ported to iOS with minimal effort.
+## 🍏 KMP & Cross-Platform Potential
+The architecture is designed for multiplatform expansion. 
+- **Business Logic**: 100% shared in `sharedLogic`.
+- **UI**: 95% shared in `sharedUI`.
+- **iOS Support**: Prepared with a `DataSource` abstraction. To enable iOS, simply implement a `IosFirestoreDataSource` in `iosMain` using the Firebase iOS SDK and provide it via Koin.
+
+---

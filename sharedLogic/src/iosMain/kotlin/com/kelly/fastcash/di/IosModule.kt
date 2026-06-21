@@ -1,7 +1,7 @@
 package com.kelly.fastcash.di
 
-import com.kelly.fastcash.data.repository.FirestoreRepositoryImpl
-import com.kelly.fastcash.domain.repository.FirestoreRepository
+import com.kelly.fastcash.data.datasource.DataSource
+import com.kelly.fastcash.data.datasource.IosFirestoreDataSource
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
 import org.koin.core.module.Module
@@ -12,5 +12,5 @@ import org.koin.dsl.module
 actual val platformModule: Module
     get() = module {
         single<HttpClientEngine> { Darwin.create() }
-        singleOf(::FirestoreRepositoryImpl) bind FirestoreRepository::class
+        singleOf(::IosFirestoreDataSource) bind DataSource::class
     }

@@ -1,6 +1,6 @@
 package com.kelly.fastcash.domain.usecase
 
-import com.kelly.fastcash.data.TestFirestoreRepository
+import com.kelly.fastcash.data.TestDatabaseRepository
 import com.kelly.fastcash.domain.models.TransactionsModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -10,11 +10,11 @@ import kotlin.test.assertEquals
 
 class GetTransactionsUseCaseTest {
 
-    private lateinit var testFirestoreRepository: TestFirestoreRepository
+    private lateinit var testFirestoreRepository: TestDatabaseRepository
 
     @BeforeTest
     fun setUp() {
-        testFirestoreRepository = TestFirestoreRepository()
+        testFirestoreRepository = TestDatabaseRepository()
     }
 
     @Test

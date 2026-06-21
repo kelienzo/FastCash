@@ -20,6 +20,9 @@ kotlinx-datetime-version = "0.6.0"
 ktor = "3.5.0"
 koin = "4.2.2"
 firebase-bom = "33.10.0"
+cucumber = "7.34.3"
+mockk = "1.13.13"
+appium = "10.1.1"
 google-services = "4.5.0"
 
 [libraries]
@@ -60,6 +63,10 @@ koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+cucumber-java = { module = "io.cucumber:cucumber-java", version.ref = "cucumber" }
+cucumber-junit = { module = "io.cucumber:cucumber-junit", version.ref = "cucumber" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+appium-java-client = { module = "io.appium:java-client", version.ref = "appium" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

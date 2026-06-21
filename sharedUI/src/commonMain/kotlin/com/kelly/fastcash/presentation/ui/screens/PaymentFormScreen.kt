@@ -41,9 +41,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -67,21 +69,15 @@ fun PaymentFormScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
             var expanded by rememberSaveable { mutableStateOf(false) }
-            var isEmailFocused by rememberSaveable { mutableStateOf(false) }
-            var isAmountFocused by rememberSaveable { mutableStateOf(false) }
             val focusManager = LocalFocusManager.current
 
             OutlinedTextField(
                 value = mainPaymentUiState.formUiState.email,
                 onValueChange = { onEvent(PaymentFormEvent.OnEnterEmail(it)) },
                 label = { Text("Recipient Email") },
-                modifier = Modifier.fillMaxWidth().onFocusChanged {
-                    isEmailFocused = it.isFocused
-                },
-                supportingText = {
-                    if (isEmailFocused && mainPaymentUiState.formUiState.isEmailValid.not())
-                        Text("Enter a valid email", color = MaterialTheme.colorScheme.error)
-                },
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("email_field")
+                    .semantics { contentDescription = "email_field" },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
@@ -92,30 +88,28 @@ fun PaymentFormScreen(
             OutlinedTextField(
                 value = mainPaymentUiState.formUiState.amount,
                 onValueChange = { input ->
-                    handleAmountInput(text = input) {
+                    handleAmountInput(text = input.replace("[-, ]".toRegex(), "")) {
                         onEvent(PaymentFormEvent.OnEnterAmount(it))
                     }
                 },
                 label = { Text("Amount") },
-                modifier = Modifier.fillMaxWidth().onFocusChanged {
-                    isAmountFocused = it.isFocused
-                },
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("amount_field")
+                    .semantics { contentDescription = "amount_field" },
                 visualTransformation = TextFieldAmountFormat,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(onDone = null),
-                supportingText = {
-                    if (isAmountFocused && mainPaymentUiState.formUiState.isAmountValid.not())
-                        Text("Enter a valid amount", color = MaterialTheme.colorScheme.error)
-                }
+                keyboardActions = KeyboardActions(onDone = null)
             )
             Spacer(modifier = Modifier.height(10.dp))
 
             ExposedDropdownMenuBox(
                 expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier.testTag("currency_selector")
+                    .semantics { contentDescription = "currency_selector" }
             ) {
                 TextField(
                     placeholder = { Text("Select currency") },
@@ -133,7 +127,9 @@ fun PaymentFormScreen(
                             onClick = {
                                 onEvent(PaymentFormEvent.OnSelectCurrency(c))
                                 expanded = false
-                            }
+                            },
+                            modifier = Modifier.testTag("currency_$c")
+                                .semantics { contentDescription = "currency_$c" }
                         )
                     }
                 }
@@ -142,11 +138,10 @@ fun PaymentFormScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = { onEvent(PaymentFormEvent.OnSendPayment) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("send_button")
+                    .semantics { contentDescription = "send_button" },
                 enabled = !mainPaymentUiState.paymentUiState.isLoading
-                        && mainPaymentUiState.formUiState.isEmailValid
-                        && mainPaymentUiState.formUiState.isAmountValid
-                        && mainPaymentUiState.formUiState.isValidCurrency
             ) {
                 if (mainPaymentUiState.paymentUiState.isLoading) CircularProgressIndicator(
 //                    color = Color.White,
@@ -168,6 +163,8 @@ fun PaymentFormScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             LazyColumn(
+                modifier = Modifier.testTag("transaction_list")
+                    .semantics { contentDescription = "transaction_list" },
                 contentPadding = PaddingValues(vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {

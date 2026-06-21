@@ -8,9 +8,6 @@ val uiModule = module {
     viewModel {
         PaymentViewModel(
             get(),
-            get(),
-            get(),
-            get(),
             get()
         )
     }

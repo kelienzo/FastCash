@@ -21,9 +21,6 @@ import kotlinx.coroutines.flow.update
 
 class PaymentViewModel(
     private val processPaymentUseCase: ProcessPaymentUseCase,
-    private val validateEmailUseCase: ValidateEmailUseCase,
-    private val validateAmountUseCase: ValidateAmountUseCase,
-    private val validateCurrencyUseCase: ValidateCurrencyUseCase,
     getTransactionsUseCase: GetTransactionsUseCase
 ) : ViewModel() {
 
@@ -41,31 +38,22 @@ class PaymentViewModel(
     fun onEvent(event: PaymentFormEvent) {
         when (event) {
             is PaymentFormEvent.OnEnterAmount -> updateFormUiState {
-                it.copy(
-                    amount = event.amount,
-                    isAmountValid = validateAmountUseCase(event.amount)
-                )
+                it.copy(amount = event.amount)
             }
 
             is PaymentFormEvent.OnEnterEmail -> updateFormUiState {
-                it.copy(
-                    email = event.email,
-                    isEmailValid = validateEmailUseCase(event.email)
-                )
+                it.copy(email = event.email)
             }
 
             is PaymentFormEvent.OnSelectCurrency -> updateFormUiState {
-                it.copy(
-                    currency = event.currency,
-                    isValidCurrency = validateCurrencyUseCase(event.currency)
-                )
+                it.copy(currency = event.currency)
             }
 
             PaymentFormEvent.OnResetState -> updatePaymentUiState()
 
             is PaymentFormEvent.OnSendPayment -> sendPayment(
                 email = mainPaymentUiState.value.formUiState.email,
-                amount = mainPaymentUiState.value.formUiState.amount.toDouble(),
+                amount = mainPaymentUiState.value.formUiState.amount.toDoubleOrNull() ?: 0.0,
                 currency = mainPaymentUiState.value.formUiState.currency
             )
 
@@ -114,11 +102,8 @@ data class MainPaymentUiState(
 
 data class FormUiState(
     val email: String = "",
-    val isEmailValid: Boolean = false,
     val amount: String = "",
-    val isAmountValid: Boolean = false,
-    val currency: String = "",
-    val isValidCurrency: Boolean = false,
+    val currency: String = ""
 )
 
 data class PaymentUiState(

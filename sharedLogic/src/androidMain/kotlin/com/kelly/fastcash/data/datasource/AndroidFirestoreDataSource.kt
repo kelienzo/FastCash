@@ -1,24 +1,18 @@
-package com.kelly.fastcash.data.repository
+package com.kelly.fastcash.data.datasource
 
-import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import com.kelly.fastcash.domain.models.TransactionsModel
-import com.kelly.fastcash.domain.repository.FirestoreRepository
 import com.kelly.fastcash.utils.toLocalDateString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
-actual class FirestoreRepositoryImpl : FirestoreRepository {
+class AndroidFirestoreDataSource(private val firestore: FirebaseFirestore) : DataSource {
 
-    private val db = FirebaseFirestore.getInstance()
-    private val collection = db.collection("payments")
-
-    actual override suspend fun saveTransaction(transactionsModel: TransactionsModel) {
-        Log.d("Save transactions", "I got here")
+    override suspend fun saveTransaction(transactionsModel: TransactionsModel) {
         val data = mapOf(
             "recipientEmail" to transactionsModel.recipientEmail,
             "amount" to transactionsModel.amount,
@@ -26,12 +20,11 @@ actual class FirestoreRepositoryImpl : FirestoreRepository {
             "timestamp" to FieldValue.serverTimestamp(),
             "status" to transactionsModel.status
         )
-        collection.add(data).await()
+        firestore.collection("payments").add(data).await()
     }
 
-    actual override fun getTransactions(): Flow<List<TransactionsModel>> {
-        Log.d("Get transactions", "I got here")
-        return collection.orderBy("timestamp", Query.Direction.DESCENDING)
+    override fun getTransactions(): Flow<List<TransactionsModel>> {
+        return firestore.collection("payments").orderBy("timestamp", Query.Direction.DESCENDING)
             .snapshots()
             .map { snapshot ->
                 snapshot.documents.map { doc ->

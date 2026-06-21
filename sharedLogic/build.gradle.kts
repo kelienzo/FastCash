@@ -56,5 +56,12 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
         }
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.cucumber.java)
+                implementation(libs.cucumber.junit)
+                implementation(libs.mockk)
+            }
+        }
     }
 }

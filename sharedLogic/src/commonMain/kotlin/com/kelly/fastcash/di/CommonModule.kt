@@ -1,7 +1,9 @@
 package com.kelly.fastcash.di
 
 import com.kelly.fastcash.data.remote.PaymentService
+import com.kelly.fastcash.data.repository.DatabaseRepositoryImpl
 import com.kelly.fastcash.data.repository.PaymentRepositoryImpl
+import com.kelly.fastcash.domain.repository.DatabaseRepository
 import com.kelly.fastcash.domain.repository.PaymentRepository
 import com.kelly.fastcash.domain.usecase.GetTransactionsUseCase
 import com.kelly.fastcash.domain.usecase.ProcessPaymentUseCase
@@ -64,8 +66,9 @@ val sharedModule = module {
         }
     }
     single { PaymentService(get()) }
+    singleOf(::DatabaseRepositoryImpl) bind DatabaseRepository::class
     singleOf(::PaymentRepositoryImpl) bind PaymentRepository::class
-    factory { ProcessPaymentUseCase(get(), get()) }
+    factory { ProcessPaymentUseCase(get(), get(), get(), get(), get()) }
     factory { GetTransactionsUseCase(get()) }
     factory { ValidateEmailUseCase() }
     factory { ValidateAmountUseCase() }
