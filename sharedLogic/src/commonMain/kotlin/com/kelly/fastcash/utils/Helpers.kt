@@ -1,5 +1,9 @@
 package com.kelly.fastcash.utils
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+
 expect val String.handleAmountFormat: String
 
 fun handleAmountInput(text: String, handle: (String) -> Unit) {
@@ -11,6 +15,14 @@ fun handleAmountInput(text: String, handle: (String) -> Unit) {
 
         } else handle(text)
     }
+}
+
+fun Long.toLocalDateString(): String {
+    val dateTime = Instant
+        .fromEpochMilliseconds(this)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+
+    return "${dateTime.dayOfMonth}/${dateTime.monthNumber}/${dateTime.year} ${dateTime.hour}:${dateTime.minute}"
 }
 
 //fun String.formatAmount(showNaira: Boolean = false): String {

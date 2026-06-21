@@ -1,7 +1,8 @@
 package com.kelly.fastcash.domain.usecase
 
-import com.kelly.fastcash.domain.models.Payment
+import com.kelly.fastcash.domain.models.PaymentRequest
 import com.kelly.fastcash.domain.models.PaymentResponse
+import com.kelly.fastcash.domain.models.TransactionsModel
 import com.kelly.fastcash.domain.repository.FirestoreRepository
 import com.kelly.fastcash.domain.repository.PaymentRepository
 import kotlinx.coroutines.Dispatchers
@@ -16,15 +17,28 @@ class ProcessPaymentUseCase(
     private val firestoreRepository: FirestoreRepository
 ) {
 
-    operator fun invoke(payment: Payment): Flow<Result<PaymentResponse>> =
+    operator fun invoke(paymentRequest: PaymentRequest): Flow<Result<PaymentResponse>> =
         flow<Result<PaymentResponse>> {
-            val paymentRes = paymentRepository.processPayment(payment)
-            if (paymentRes.status) {
-                firestoreRepository.saveTransaction(payment)
-                emit(Result.success(paymentRes))
-            } else {
-                emit(Result.failure(Throwable("Payment failed.")))
+            val paymentRes = paymentRepository.processPayment(paymentRequest)
+            runCatching {
+                firestoreRepository.saveTransaction(
+                    TransactionsModel(
+                        recipientEmail = paymentRes.recipientEmail.orEmpty(),
+                        amount = paymentRes.amount ?: 0.0,
+                        currency = paymentRes.currency.orEmpty(),
+                        status = paymentRes.status
+                    )
+                )
+            }.onFailure {
+                println("Firestore Save failed $it")
             }
+            emit(
+                if (paymentRes.status) {
+                    Result.success(paymentRes)
+                } else {
+                    Result.failure(Throwable("Payment failed."))
+                }
+            )
         }.catch {
             it.printStackTrace()
             emit(Result.failure(it))

@@ -1,12 +1,11 @@
-package com.kelly.fastcash.domain.models
+package com.kelly.fastcash.data.model
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Payment(
-    val id: String? = null,
+data class PaymentRequestDTO(
     val recipientEmail: String,
     val amount: Double,
     val currency: String,
-    val timestamp: Long = 0L
+    val transactionStatus: Boolean
 )

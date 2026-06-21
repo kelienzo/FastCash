@@ -2,8 +2,9 @@ package com.kelly.fastcash.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kelly.fastcash.domain.models.Payment
+import com.kelly.fastcash.domain.models.PaymentRequest
 import com.kelly.fastcash.domain.models.PaymentResponse
+import com.kelly.fastcash.domain.usecase.GetTransactionsUseCase
 import com.kelly.fastcash.domain.usecase.ProcessPaymentUseCase
 import com.kelly.fastcash.domain.usecase.ValidateAmountUseCase
 import com.kelly.fastcash.domain.usecase.ValidateCurrencyUseCase
@@ -22,12 +23,15 @@ class PaymentViewModel(
     private val processPaymentUseCase: ProcessPaymentUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase,
     private val validateAmountUseCase: ValidateAmountUseCase,
-    private val validateCurrencyUseCase: ValidateCurrencyUseCase
+    private val validateCurrencyUseCase: ValidateCurrencyUseCase,
+    getTransactionsUseCase: GetTransactionsUseCase
 ) : ViewModel() {
 
     private val _mainPaymentUiState = MutableStateFlow(MainPaymentUiState())
     private val _formUiState = MutableStateFlow(FormUiState())
     private val _paymentUiState = MutableStateFlow(PaymentUiState())
+
+    val transactions = getTransactionsUseCase()
 
     val mainPaymentUiState =
         combine(_mainPaymentUiState, _formUiState, _paymentUiState) { main, form, payment ->
@@ -65,22 +69,27 @@ class PaymentViewModel(
                 currency = mainPaymentUiState.value.formUiState.currency
             )
 
-            else -> {}
+//            else -> {}
         }
     }
 
     private fun sendPayment(email: String, amount: Double, currency: String) {
-        processPaymentUseCase(Payment(recipientEmail = email, amount = amount, currency = currency))
-            .onStart {
-                updatePaymentUiState(isLoading = true)
-            }.onEach { result ->
-                result.onSuccess { response ->
-                    updatePaymentUiState(response = response)
-                    _formUiState.value = FormUiState()
-                }.onFailure { failed ->
-                    updatePaymentUiState(errorMessage = failed.message)
-                }
-            }.launchIn(viewModelScope)
+        processPaymentUseCase(
+            PaymentRequest(
+                recipientEmail = email,
+                amount = amount,
+                currency = currency
+            )
+        ).onStart {
+            updatePaymentUiState(isLoading = true)
+        }.onEach { result ->
+            result.onSuccess { response ->
+                updatePaymentUiState(response = response)
+                _formUiState.value = FormUiState()
+            }.onFailure { failed ->
+                updatePaymentUiState(errorMessage = failed.message)
+            }
+        }.launchIn(viewModelScope)
     }
 
     private fun updateFormUiState(update: (FormUiState) -> FormUiState) {

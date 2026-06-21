@@ -7,11 +7,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.kelly.fastcash.presentation.ui.screens.PaymentFormEvent
 import com.kelly.fastcash.presentation.ui.screens.PaymentFormScreen
-import com.kelly.fastcash.presentation.ui.screens.TransactionHistoryScreen
 import com.kelly.fastcash.presentation.viewmodel.PaymentViewModel
-import com.kelly.fastcash.presentation.viewmodel.TransactionHistoryViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -25,29 +22,31 @@ fun FastCashNavGraph(modifier: Modifier) {
     ) {
         composable<Routes.PaymentFormRoute> {
             val viewModel = koinViewModel<PaymentViewModel>()
+            val transactionsList by viewModel.transactions.collectAsStateWithLifecycle(emptyList())
             val mainPaymentUiState by viewModel.mainPaymentUiState.collectAsStateWithLifecycle()
 
             PaymentFormScreen(
+                transactions = transactionsList,
                 mainPaymentUiState = mainPaymentUiState,
                 onEvent = { event ->
-                    when(event) {
-                        PaymentFormEvent.OnNavigateToTransactionHistory -> navController.navigate(Routes.TransactionHistoryRoute)
-                        else -> viewModel.onEvent(event)
-                    }
+//                        PaymentFormEvent.OnNavigateToTransactionHistory -> navController.navigate(
+//                            Routes.TransactionHistoryRoute
+//                        )
+                    viewModel.onEvent(event)
                 }
             )
         }
 
-        composable<Routes.TransactionHistoryRoute> {
-            val viewModel = koinViewModel<TransactionHistoryViewModel>()
-            val transactions by viewModel.transactions.collectAsStateWithLifecycle(emptyList())
-
-            TransactionHistoryScreen(
-                transactions = transactions,
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
+//        composable<Routes.TransactionHistoryRoute> {
+//            val viewModel = koinViewModel<TransactionHistoryViewModel>()
+//            val transactions by viewModel.transactions.collectAsStateWithLifecycle(emptyList())
+//
+//            TransactionHistoryScreen(
+//                transactions = transactions,
+//                onBack = {
+//                    navController.popBackStack()
+//                }
+//            )
+//        }
     }
 }

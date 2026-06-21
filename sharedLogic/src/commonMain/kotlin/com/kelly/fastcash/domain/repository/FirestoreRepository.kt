@@ -1,9 +1,9 @@
 package com.kelly.fastcash.domain.repository
 
-import com.kelly.fastcash.domain.models.Payment
+import com.kelly.fastcash.domain.models.TransactionsModel
 import kotlinx.coroutines.flow.Flow
 
 interface FirestoreRepository {
-    suspend fun saveTransaction(payment: Payment)
-    fun getTransactions(): Flow<List<Payment>>
+    suspend fun saveTransaction(transactionsModel: TransactionsModel)
+    fun getTransactions(): Flow<List<TransactionsModel>>
 }
