@@ -53,6 +53,22 @@ The architecture is "iOS-Ready." By using the **Expect/Actual** pattern and **In
 
 ---
 
+## 📦 Setup & Configuration
+
+### 1. Backend API
+The app is configured to use a Mock API for payment processing:
+- **Base URL**: `https://6a36bb11766b831960f9816a.mockapi.io`
+- **Endpoint**: `POST /payments`
+- **Logic**: The Ktor client in the shared module handles the request/response cycle, which is then verified by the JMeter performance tests.
+
+### 2. Firebase Setup
+1.  **Project**: Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
+2.  **App**: Add an Android app with package name `com.kelly.fastcash`.
+3.  **Config**: Download `google-services.json` and place it in the `androidApp/` directory.
+4.  **Firestore**: Enable Cloud Firestore and create a `payments` collection to store transaction records.
+
+---
+
 ## 🛠 Tech Stack
 - **UI**: Jetpack Compose / Compose Multiplatform
 - **DI**: Koin for Dependency Injection
