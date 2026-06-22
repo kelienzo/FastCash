@@ -7,6 +7,7 @@ import kotlinx.datetime.toLocalDateTime
 expect val String.handleAmountFormat: String
 
 fun handleAmountInput(text: String, handle: (String) -> Unit) {
+    if (text == ".") return
     if ((text.toDoubleOrNull() ?: 0.0) <= 1_000_000_000.00) {
         if (text.contains(".")) {
             if (text.substringAfter(".").length <= 2)

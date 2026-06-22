@@ -88,7 +88,7 @@ fun PaymentFormScreen(
             OutlinedTextField(
                 value = mainPaymentUiState.formUiState.amount,
                 onValueChange = { input ->
-                    handleAmountInput(text = input.replace("[-, ]".toRegex(), "")) {
+                    handleAmountInput(text = input.replace("[-, _]".toRegex(), "")) {
                         onEvent(PaymentFormEvent.OnEnterAmount(it))
                     }
                 },
