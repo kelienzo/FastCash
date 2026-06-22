@@ -76,9 +76,21 @@ Automated flow: Enter details -> Send -> Verify in history list.
 ```
 
 ### 📈 Performance Testing (JMeter)
-A JMeter test plan should target the `POST /payments` endpoint.
-- **Target**: `https://6a36bb11766b831960f9816a.mockapi.io/payments`
-- **Config**: 5 concurrent users, measuring response time and throughput.
+The project includes a JMeter test plan to evaluate the API's performance under load, specifically targeting the payment processing endpoint.
+
+- **Test Plan Location**: `jmeter/fast_cash_test_plan.jmx`
+- **Configuration**: 5 concurrent users (Thread Group) hitting the `POST /payments` endpoint.
+- **Artifacts**:
+    - **Raw Data**: `jmeter/fastcashtest.jtl`
+    - **Visual Report**: Open `jmeter/html_report/index.html` in any web browser to view the Dashboard Report (includes Response Time Percentiles, Throughput, and Error rates).
+
+**How to run**:
+1.  Install [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi).
+2.  Launch JMeter and open the `.jmx` file.
+3.  To run and generate a new report via command line:
+    ```bash
+    jmeter -n -t jmeter/fast_cash_test_plan.jmx -l jmeter/new_results.jtl -e -o jmeter/new_report
+    ```
 
 ## 🍏 KMP & Cross-Platform Potential
 The architecture is designed for multiplatform expansion. 
