@@ -33,6 +33,17 @@ To verify the app's functionality, follow these steps:
 
 ---
 
+## ✨ Key Features
+- **Send Payment**: 
+    - Input validation (email, amount, currency) handled in the shared KMP module.
+    - POST request to a mock API via Ktor.
+    - Automatic synchronization of successful payments to Firestore.
+- **Real-time Transaction History**:
+    - **Firestore Snapshot Listener**: The transaction list updates automatically in real-time as soon as a new payment is added to the database, without requiring a manual refresh.
+    - Displays recipient, amount, currency, status, and formatted timestamps.
+
+---
+
 ## 🚀 Architecture & KMP Potential
 This project uses **Clean Architecture** to ensure the code is testable, maintainable, and platform-agnostic.
 
