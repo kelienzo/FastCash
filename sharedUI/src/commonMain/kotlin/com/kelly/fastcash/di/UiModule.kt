@@ -11,5 +11,4 @@ val uiModule = module {
             get()
         )
     }
-//    viewModel { TransactionHistoryViewModel(get()) }
 }
