@@ -78,17 +78,33 @@ End-to-end business scenarios in plain English.
 ```
 
 ### 📱 UI Testing (Appium)
-Automated UI flow testing.
-1. Start Appium Server: `appium`
-2. Run tests:
+Automated UI flow testing using UiAutomator2.
+1. **Start Appium Server**: Run `appium` in your terminal.
+2. **Device Setup**: Ensure a device/emulator is connected (`adb devices`).
+    - *Note for Physical Devices (OPPO/Xiaomi/Realme)*: Enable **"USB Debugging (Security Settings)"** in Developer Options to allow Appium to simulate input.
+3. **Run tests**:
 ```bash
 ./gradlew :appiumTests:test
 ```
+*Note: The test is configured to automatically activate the app and handle the software keyboard.*
 
 ### 📈 Performance Testing (JMeter)
 API Load testing for the `/payments` endpoint.
 - **Test Plan**: `jmeter/fast_cash_test_plan.jmx`
+- **Configuration**: 5 concurrent users hitting the production mock API.
 - **Report**: Open `jmeter/html_report/index.html` in a browser to see response time percentiles and throughput.
+
+**How to run (CLI)**:
+```bash
+jmeter -n -t jmeter/fast_cash_test_plan.jmx -l jmeter/results.jtl -e -o jmeter/report
+```
+
+---
+## ⚙️ Prerequisites
+- **JDK**: 17 or higher
+- **Android SDK**: API 34+
+- **Appium**: 2.0+ (with `uiautomator2` driver)
+- **JMeter**: 5.0+
 
 ---
 **Author**: Kelly

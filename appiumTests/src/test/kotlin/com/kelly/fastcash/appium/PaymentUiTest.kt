@@ -2,12 +2,14 @@ package com.kelly.fastcash.appium
 
 import io.appium.java_client.AppiumBy
 import io.appium.java_client.android.AndroidDriver
+import io.appium.java_client.android.nativekey.AndroidKey
+import io.appium.java_client.android.nativekey.KeyEvent
 import io.appium.java_client.android.options.UiAutomator2Options
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.net.URL
+import java.net.URI
 import java.time.Duration
 import kotlin.test.assertTrue
 
@@ -21,27 +23,49 @@ class PaymentUiTest {
         val options = UiAutomator2Options()
             .setPlatformName("Android")
             .setAutomationName("UiAutomator2")
-            .setDeviceName("Android Device")
+//            .setDeviceName("Android Device")
+            .setDeviceName("10.159.208.144:5555")
             .setAppPackage("com.kelly.fastcash")
             .setAppActivity(".MainActivity")
-            .setNoReset(false)
+            .setNoReset(true)
             .setFullReset(false)
+            .setAppWaitActivity(".MainActivity")
+            .setAppWaitDuration(Duration.ofSeconds(20))
 
         // Ensure Appium server is running at localhost:4723
         // If running Appium 2.0, the base path is usually "/" (default)
-        driver = AndroidDriver(URL("http://127.0.0.1:4723"), options)
+        driver = AndroidDriver(URI("http://10.159.208.1:4723/").toURL(), options)
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10))
     }
 
     @Test
     fun testSendPaymentAndVerifyInHistory() {
+        // Automatically launch/activate the app at the start of the test
+        driver.activateApp("com.kelly.fastcash")
+
         // 1. Enter Email
-        val emailField = driver.findElement(AppiumBy.accessibilityId("email_field"))
+        // Using XPath to target the EditText specifically to avoid InvalidElementStateException
+        val emailField =
+            driver.findElement(AppiumBy.xpath("//android.widget.EditText[.//android.view.View[@content-desc='email_field']]"))
+        emailField.click()
+        emailField.clear()
         emailField.sendKeys("test@fastcash.com")
 
         // 2. Enter Amount
-        val amountField = driver.findElement(AppiumBy.accessibilityId("amount_field"))
+        val amountField =
+            driver.findElement(AppiumBy.xpath("//android.widget.EditText[.//android.view.View[@content-desc='amount_field']]"))
+        amountField.click()
+        amountField.clear()
         amountField.sendKeys("150")
+
+        // Hide keyboard to ensure the dropdown is visible
+        try {
+            if (driver.isKeyboardShown) {
+                driver.pressKey(KeyEvent(AndroidKey.BACK))
+            }
+        } catch (e: Exception) {
+            // Ignore keyboard hiding errors
+        }
 
         // 3. Select Currency (Open Dropdown)
         val currencySelector = driver.findElement(AppiumBy.accessibilityId("currency_selector"))
@@ -56,16 +80,22 @@ class PaymentUiTest {
         sendButton.click()
 
         // 5. Verify Success Dialog
-        val okButton = driver.findElement(AppiumBy.xpath("//android.widget.Button[@text='OK']"))
+        // Use a more robust selector that finds the text "OK" regardless of the container
+        val okButton =
+            driver.findElement(AppiumBy.xpath("//*[@text='OK' or @text='Ok' or @text='ok']"))
         okButton.click()
 
         // 6. Verify item appears in the list (transaction_list test tag)
-        val transactionList = driver.findElement(AppiumBy.accessibilityId("transaction_list"))
+        // We wait a bit for the list to refresh from Firestore
+        Thread.sleep(2000)
 
         // Check if the recipient email appears in the list
         val result =
             driver.findElements(AppiumBy.xpath("//android.widget.TextView[@text='test@fastcash.com']"))
-        assertTrue(result.isNotEmpty(), "Transaction should be visible in the history list")
+        assertTrue(
+            result.isNotEmpty(),
+            "Transaction 'test@fastcash.com' should be visible in the history list"
+        )
     }
 
     @AfterAll
