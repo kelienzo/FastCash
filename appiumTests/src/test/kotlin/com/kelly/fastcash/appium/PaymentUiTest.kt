@@ -24,7 +24,7 @@ class PaymentUiTest {
             .setPlatformName("Android")
             .setAutomationName("UiAutomator2")
 //            .setDeviceName("Android Device")
-            .setDeviceName("10.159.208.144:5555")
+            .setDeviceName("10.198.45.243:5555")
             .setAppPackage("com.kelly.fastcash")
             .setAppActivity(".MainActivity")
             .setNoReset(true)
@@ -34,7 +34,7 @@ class PaymentUiTest {
 
         // Ensure Appium server is running at localhost:4723
         // If running Appium 2.0, the base path is usually "/" (default)
-        driver = AndroidDriver(URI("http://10.159.208.1:4723/").toURL(), options)
+        driver = AndroidDriver(URI("http://10.198.45.1:4723/").toURL(), options)
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10))
     }
 
@@ -64,7 +64,7 @@ class PaymentUiTest {
                 driver.pressKey(KeyEvent(AndroidKey.BACK))
             }
         } catch (e: Exception) {
-            // Ignore keyboard hiding errors
+            e.printStackTrace()
         }
 
         // 3. Select Currency (Open Dropdown)
@@ -79,7 +79,7 @@ class PaymentUiTest {
         val sendButton = driver.findElement(AppiumBy.accessibilityId("send_button"))
         sendButton.click()
 
-        // 5. Verify Success Dialog
+        // 5. Verify Success/Failure Dialog
         // Use a more robust selector that finds the text "OK" regardless of the container
         val okButton =
             driver.findElement(AppiumBy.xpath("//*[@text='OK' or @text='Ok' or @text='ok']"))

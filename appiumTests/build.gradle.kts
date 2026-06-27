@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 repositories {
@@ -8,9 +8,9 @@ repositories {
 
 dependencies {
     testImplementation(libs.appium.java.client)
-    testImplementation("org.seleniumhq.selenium:selenium-java:4.25.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
-    testImplementation(kotlin("test"))
+    testImplementation(libs.selenium.java)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotlin.test)
 }
 
 tasks.test {

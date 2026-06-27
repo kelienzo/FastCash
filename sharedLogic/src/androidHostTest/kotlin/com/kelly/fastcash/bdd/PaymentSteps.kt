@@ -21,7 +21,7 @@ import kotlin.test.assertTrue
 class PaymentSteps {
 
     private val testDatabaseRepository = TestDatabaseRepository()
-    private val testPaymentRepository = FakePaymentRepository()
+    private val testPaymentRepository = TestPaymentRepository()
     private val validateEmailUseCase = ValidateEmailUseCase()
     private val validateAmountUseCase = ValidateAmountUseCase()
     private val validateCurrencyUseCase = ValidateCurrencyUseCase()
@@ -80,7 +80,7 @@ class PaymentSteps {
 
     @Then("the payment should be processed successfully")
     fun the_payment_should_be_processed_successfully() {
-        assertTrue(paymentResult?.isSuccess == true)
+        assertEquals(paymentResult?.isSuccess, true)
     }
 
     @Then("the transaction should be saved to the database")
@@ -91,7 +91,7 @@ class PaymentSteps {
 
     @Then("the payment should fail")
     fun the_payment_should_fail() {
-        assertTrue(paymentResult?.isFailure == true)
+        assertEquals(paymentResult?.isFailure, true)
     }
 
     @Then("an error message {string} should be shown")
@@ -104,7 +104,7 @@ class PaymentSteps {
         assertEquals(expectedCount, transactionHistory?.size)
     }
 
-    private class FakePaymentRepository : PaymentRepository {
+    private class TestPaymentRepository : PaymentRepository {
         var nextResponse: PaymentResponse? = null
         override suspend fun processPayment(paymentRequest: PaymentRequest): PaymentResponse {
             return nextResponse ?: PaymentResponse(
