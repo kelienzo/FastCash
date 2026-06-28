@@ -1,9 +1,9 @@
 package com.kelly.fastcash.domain.usecase
 
 import com.kelly.fastcash.data.TestDatabaseRepository
+import com.kelly.fastcash.data.TestPaymentRepository
 import com.kelly.fastcash.domain.models.PaymentRequest
 import com.kelly.fastcash.domain.models.PaymentResponse
-import com.kelly.fastcash.domain.repository.PaymentRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -34,7 +34,7 @@ class ProcessPaymentUseCaseTest {
             testPaymentRepository,
             testDatabaseRepository,
 
-        )
+            )
     }
 
     @Test
@@ -97,19 +97,4 @@ class ProcessPaymentUseCaseTest {
             assertEquals("Network error", result.exceptionOrNull()?.message)
             assertEquals(true, testDatabaseRepository.getTransactions().first().isEmpty())
         }
-
-    private class TestPaymentRepository : PaymentRepository {
-        var response: PaymentResponse? = null
-        var shouldThrow: Boolean = false
-
-        override suspend fun processPayment(paymentRequest: PaymentRequest): PaymentResponse {
-            if (shouldThrow) throw Exception("Network error")
-            return response ?: PaymentResponse(
-                paymentRequest.amount,
-                paymentRequest.currency,
-                paymentRequest.recipientEmail,
-                true
-            )
-        }
-    }
 }

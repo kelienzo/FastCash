@@ -1,10 +1,10 @@
 package com.kelly.fastcash.bdd
 
 import com.kelly.fastcash.data.TestDatabaseRepository
+import com.kelly.fastcash.data.TestPaymentRepository
 import com.kelly.fastcash.domain.models.PaymentRequest
 import com.kelly.fastcash.domain.models.PaymentResponse
 import com.kelly.fastcash.domain.models.TransactionsModel
-import com.kelly.fastcash.domain.repository.PaymentRepository
 import com.kelly.fastcash.domain.usecase.GetTransactionsUseCase
 import com.kelly.fastcash.domain.usecase.ProcessPaymentUseCase
 import com.kelly.fastcash.domain.usecase.ValidateAmountUseCase
@@ -41,7 +41,7 @@ class PaymentSteps {
     @Given("a user enters valid payment details {string}, {double}, {string}")
     fun a_user_enters_valid_payment_details(email: String, amount: Double, currency: String) {
         paymentRequest = PaymentRequest(email, amount, currency)
-        testPaymentRepository.nextResponse = PaymentResponse(amount, currency, email, true)
+        testPaymentRepository.response = PaymentResponse(amount, currency, email, true)
     }
 
     @Given("a user enters an invalid amount {string}")
@@ -102,17 +102,5 @@ class PaymentSteps {
     @Then("they should see {int} transactions in the list")
     fun they_should_see_transactions_in_the_list(expectedCount: Int) {
         assertEquals(expectedCount, transactionHistory?.size)
-    }
-
-    private class TestPaymentRepository : PaymentRepository {
-        var nextResponse: PaymentResponse? = null
-        override suspend fun processPayment(paymentRequest: PaymentRequest): PaymentResponse {
-            return nextResponse ?: PaymentResponse(
-                paymentRequest.amount,
-                paymentRequest.currency,
-                paymentRequest.recipientEmail,
-                true
-            )
-        }
     }
 }
