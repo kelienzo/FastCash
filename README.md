@@ -1,5 +1,5 @@
 # FastCash - KMP Payment App
-[![GitHub Link](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/kelly/FastCash)
+[![GitHub Link](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/kelienzo/FastCash)
 
 A cross-platform FinTech application built with **Kotlin Multiplatform (KMP)**, **Firebase**, and **Jetpack Compose**. This project demonstrates Clean Architecture, automated testing (BDD, UI, Performance), and shared business logic for mobile platforms.
 
@@ -135,4 +135,4 @@ jmeter -n -t jmeter/fast_cash_test_plan.jmx -l jmeter/results.jtl -e -o jmeter/r
 
 ---
 **Author**: Kelly
-**GitHub**: [github.com/kelly/FastCash](https://github.com/kelly/FastCash)
+**GitHub**: [github.com/kelly/FastCash](https://github.com/kelienzo/FastCash)
